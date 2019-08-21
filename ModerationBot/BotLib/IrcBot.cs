@@ -13,7 +13,7 @@ namespace ModerationBot {
     class IrcBot {
 
         //Connection state variables
-        private string server;
+        public string Server { get; set; }
         private int port = 6667;
         private string gecos;
         private string nick;
@@ -25,7 +25,7 @@ namespace ModerationBot {
         private long lastPing = 0;
         private int timeOut = 15; //Amount of time when TcpClient timesout
         private bool hasReplied = true;
-        private Thread connectionThread;
+        private MaintenanceManager manager;
         private bool connected = false;
 
         private string ident;
@@ -34,7 +34,7 @@ namespace ModerationBot {
         public int ReconnectDelay { get; set; } = 3; //Delay in seconds
 
         //Objects for interacting with server
-        private TcpClient client;
+        internal TcpClient Client { get; set; }
         private StreamWriter writer;
         private StreamReader reader;
         private Thread streamThread;
@@ -44,7 +44,7 @@ namespace ModerationBot {
 
         public IrcBot(Configuration configuration) {
             this.configuration = configuration;
-            this.server = configuration.GetString("server");
+            this.Server = configuration.GetString("server");
             this.nick = configuration.GetString("nick");
             this.gecos = configuration.GetString("gecos");
             this.ident = configuration.GetString("ident");
@@ -56,16 +56,16 @@ namespace ModerationBot {
         }
 
         private void initTcpClient() {
-            this.client = new TcpClient();
-            this.client.ReceiveTimeout = this.timeOut * 1000;
+            this.Client = new TcpClient();
+            this.Client.ReceiveTimeout = this.timeOut * 1000;
             this.supported = new Dictionary<string, string>();
         }
 
         public bool Connect() {
             //Set up TCP Client and Read/Write Streams
             initTcpClient();
-            this.client.Connect(this.server, this.port);
-            NetworkStream stream = client.GetStream();
+            this.Client.Connect(this.Server, this.port);
+            NetworkStream stream = Client.GetStream();
             this.writer = new StreamWriter(stream);
             this.reader = new StreamReader(stream);
             //Send necessary IRC messages to establish a session
@@ -75,15 +75,14 @@ namespace ModerationBot {
                 $"NICK {nick}"
                 );
 
-            Console.WriteLine($"Successfully connected to {this.server} on port {this.port}");
+            Console.WriteLine($"Successfully connected to {this.Server} on port {this.port}");
             if (this.streamThread == null) {
                 this.streamThread = new Thread(new ThreadStart(Run));
                 streamThread.Start();
             }
 
-            if (this.connectionThread == null) {
-                this.connectionThread = new Thread(new ThreadStart(ConnectionManager));
-                this.connectionThread.Start();
+            if (manager == null) {
+                manager = new MaintenanceManager(this);
             }
             return true;
         }
@@ -91,7 +90,7 @@ namespace ModerationBot {
         public void PrintState() {
             while (true) {
                 Thread.Sleep(1000);
-                Console.WriteLine(this.GetState(this.client));
+                Console.WriteLine(this.GetState(this.Client));
             }
         }
 
@@ -106,9 +105,6 @@ namespace ModerationBot {
         }
 
         public void Run() {
-
-            // identify with the server so your bot can be an op on the channel
-            //writer.WriteLine($"PRIVMSG NickServ :IDENTIFY {nick} {password}");
             bool initialConnect = true;
 
             while (this.AutoReconnect || initialConnect) {
@@ -134,7 +130,7 @@ namespace ModerationBot {
         }
 
         private void ConnectionLoop() {
-            while (client.Connected) {
+            while (Client.Connected) {
                 string data = reader.ReadLine();
                 if (data != null) {
                     Console.WriteLine(data);
@@ -185,18 +181,18 @@ namespace ModerationBot {
             }
         }
 
-        private void ConnectionManager() {
-            while (true) {
-                try {
-                    if (this.client.Connected) {
-                        Thread.Sleep(this.timeOut * 1000 / 2);
-                        Write($"PING {this.server}");
-                    }
-                } catch (Exception) {
-                    Console.WriteLine($"Failed to send PING to {this.server}");
-                }
-            }
-        }
+        //private void ConnectionManager() {
+        //    while (true) {
+        //        try {
+        //            if (this.Client.Connected) {
+        //                Thread.Sleep(this.timeOut * 1000 / 2);
+        //                Write($"PING {this.Server}");
+        //            }
+        //        } catch (Exception) {
+        //            Console.WriteLine($"Failed to send PING to {this.Server}");
+        //        }
+        //    }
+        //}
 
         private void LogSupportData(string data) {
             Match match = Regex.Match(data, @"[^\s]+?=[^\s]+");
@@ -242,7 +238,7 @@ namespace ModerationBot {
             this.nick = newNick;
         }
 
-        private bool Write(params string[] messages) {
+        internal bool Write(params string[] messages) {
             foreach (string message in messages) { //Write to stream
                 this.writer.WriteLine(message);
             }
