@@ -13,11 +13,11 @@ namespace ModerationBot {
     class IrcBot {
 
         //Connection state variables
-        private string server = "irc.freenode.net";
+        private string server;
         private int port = 6667;
-        private string gecos = "Bot";
-        private string nick = "TestoBot";
-        private string password = "password";
+        private string gecos;
+        private string nick;
+        private string password;
 
         private Dictionary<string, string> supported;
 
@@ -28,8 +28,8 @@ namespace ModerationBot {
         private Thread connectionThread;
         private bool connected = false;
 
-        private string ident = "TestoBot";
-        public string Channel { get; set; } = "#TestoBot";
+        private string ident;
+        public string Channel { get; set; }
         public bool AutoReconnect { get; set; } = true;
         public int ReconnectDelay { get; set; } = 3; //Delay in seconds
 
@@ -38,17 +38,21 @@ namespace ModerationBot {
         private StreamWriter writer;
         private StreamReader reader;
         private Thread streamThread;
+        private Configuration configuration;
 
         public EventManager EventManager { get; set; }
 
-        public IrcBot(string server, string nick) {
-            this.server = server;
-            this.nick = nick;
-            this.gecos = nick;
-            this.ident = nick;
+        public IrcBot(Configuration configuration) {
+            this.configuration = configuration;
+            this.server = configuration.GetString("server");
+            this.nick = configuration.GetString("nick");
+            this.gecos = configuration.GetString("gecos");
+            this.ident = configuration.GetString("ident");
+            this.port = configuration.GetInt("port");
+            this.password = configuration.GetString("password");
+            this.Channel = configuration.GetString("channel");
+
             this.EventManager = new DefaultEventManager(this);
-
-
         }
 
         private void initTcpClient() {
@@ -134,12 +138,12 @@ namespace ModerationBot {
                 string data = reader.ReadLine();
                 if (data != null) {
                     Console.WriteLine(data);
-                    processData(data);
+                    ProcessData(data);
                 }
             }
         }
 
-        private void processData(string data) {
+        private void ProcessData(string data) {
 
             string[] d = data.Split(' ');
 
@@ -181,24 +185,8 @@ namespace ModerationBot {
             }
         }
 
-        private void CheckConnectionStatus() {
-            if (this.client.Connected) { //Make sure there is a connection to check
-                long currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
-
-                if (currentTime - lastPing > this.timeOut * 1000) {
-                    if (hasReplied) {
-                        Write($"PING {this.server}");
-                        hasReplied = false;
-                    } else {
-
-                    }
-                }
-            }
-        }
-
         private void ConnectionManager() {
             while (true) {
-                //CheckConnectionStatus();
                 try {
                     if (this.client.Connected) {
                         Thread.Sleep(this.timeOut * 1000 / 2);
