@@ -3,11 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29209.62
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModerationHelper", "ModerationHelper\ModerationHelper.csproj", "{7543807B-BE80-4C1B-BED4-B74CF87C68DF}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModerationData", "ModerationData\ModerationData.csproj", "{E4A3F12C-0E0A-49B1-96F3-1172D52A5C5A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModerationBot", "ModerationBot\ModerationBot.csproj", "{351E1C71-CF2D-4546-A4CD-3EFFE6659254}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ModerationBot", "ModerationBot\ModerationBot.csproj", "{351E1C71-CF2D-4546-A4CD-3EFFE6659254}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,14 +11,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7543807B-BE80-4C1B-BED4-B74CF87C68DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7543807B-BE80-4C1B-BED4-B74CF87C68DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7543807B-BE80-4C1B-BED4-B74CF87C68DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7543807B-BE80-4C1B-BED4-B74CF87C68DF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E4A3F12C-0E0A-49B1-96F3-1172D52A5C5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E4A3F12C-0E0A-49B1-96F3-1172D52A5C5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E4A3F12C-0E0A-49B1-96F3-1172D52A5C5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E4A3F12C-0E0A-49B1-96F3-1172D52A5C5A}.Release|Any CPU.Build.0 = Release|Any CPU
 		{351E1C71-CF2D-4546-A4CD-3EFFE6659254}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{351E1C71-CF2D-4546-A4CD-3EFFE6659254}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{351E1C71-CF2D-4546-A4CD-3EFFE6659254}.Release|Any CPU.ActiveCfg = Release|Any CPU

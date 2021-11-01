@@ -20,10 +20,10 @@ namespace ModerationBot.BotLib {
             if (File.Exists(this.fileName)) {
                 StreamReader reader = new StreamReader(fileName);
                 string[] contents = reader.ReadToEnd().Split(",");
-                foreach(string info in contents) {
+                foreach (string info in contents) {
                     string[] keyValue = info.Split("=");
-                    if(keyValue.Length == 2) { //Ignore anything that doesn't conform to x=y
-                        configurationData.Add(processKey(keyValue[0]),keyValue[1].Trim());
+                    if (keyValue.Length == 2) { //Ignore anything that doesn't conform to configName=configValue
+                        configurationData.Add(processKey(keyValue[0]), keyValue[1].Trim());
                     }
                 }
             } else {

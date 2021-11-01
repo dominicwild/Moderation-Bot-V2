@@ -7,9 +7,11 @@ namespace ModerationBot.BotLib {
     class MaintenanceManager {
 
         private IrcBot bot;
-        private int timeOut = 15; //Amount of time when TcpClient timesout in seconds
+        private int connectionTimeOut = 15; //Amount of time when TcpClient timesout in seconds
+        private int changeNickAttempt = 60; //Amount of time to attempt simplifying nick
         private int step = 1; //Amount of delay between maintenance loops in seconds
         private int stepCount = 0; //The amount of time that has passed in seconds from the maintence thread starting
+        internal bool removeUnderscore = true;
         private Thread thread;
 
         public MaintenanceManager(IrcBot bot) {
@@ -21,6 +23,7 @@ namespace ModerationBot.BotLib {
         private void ConnectionManager() {
             while (true) {
                 CheckConnectionStatus();
+                RemoveUnderscore();
                 Thread.Sleep(step * 1000);
                 stepCount += step;
             }
@@ -28,11 +31,28 @@ namespace ModerationBot.BotLib {
 
         private void CheckConnectionStatus() {
             try {
-                if (bot.Client.Connected && stepCount % Math.Floor(timeOut/2.0) == 0) { //If bot doesn't recieve a message every x seconds, closes the connection
+                if (bot.Client.Connected && stepCount % Math.Floor(connectionTimeOut/2.0) == 0) { //If bot doesn't recieve a message every x seconds, closes the connection
                     bot.Write($"PING {bot.Server}");
                 }
             } catch (Exception) {
                 Console.WriteLine($"Failed to send PING to {bot.Server}");
+            }
+        }
+
+        private void RemoveUnderscore() {
+            if (removeUnderscore && stepCount % changeNickAttempt == 0) {
+                string nick = bot.Nick; 
+                int length = nick.Length;
+                if(nick.EndsWith('_')) {
+                    for(int i = length-1; i >= 0; i--) {
+                        Console.WriteLine($"The letter {nick[i]} is at position {i}");
+                        if (!nick[i].Equals('_')) { //If we stop on a non-underscore
+                            string newNick = nick.Substring(0, i+1);
+                            bot.ChangeNick(newNick);
+                            return;
+                        }
+                    }
+                }
             }
         }
 

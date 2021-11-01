@@ -16,7 +16,7 @@ namespace ModerationBot {
         public string Server { get; set; }
         private int port = 6667;
         private string gecos;
-        private string nick;
+        public string Nick { get; set; }
         private string password;
 
         private Dictionary<string, string> supported;
@@ -45,7 +45,7 @@ namespace ModerationBot {
         public IrcBot(Configuration configuration) {
             this.configuration = configuration;
             this.Server = configuration.GetString("server");
-            this.nick = configuration.GetString("nick");
+            this.Nick = configuration.GetString("nick");
             this.gecos = configuration.GetString("gecos");
             this.ident = configuration.GetString("ident");
             this.port = configuration.GetInt("port");
@@ -72,7 +72,7 @@ namespace ModerationBot {
             this.Write(
                 $"PASS {password}",
                 $"USER {ident} * 8 {gecos}",
-                $"NICK {nick}"
+                $"NICK {Nick}"
                 );
 
             Console.WriteLine($"Successfully connected to {this.Server} on port {this.port}");
@@ -157,7 +157,7 @@ namespace ModerationBot {
                                 break;
                             }
                         case Code.ERR_NICKNAMEINUSE: {
-                                ChangeNick(this.nick + '_');
+                                ChangeNick(this.Nick + '_');
                                 break;
                             }
                         case Code.RPL_ISUPPORT: {
@@ -213,7 +213,7 @@ namespace ModerationBot {
 
                 string message = data.Split(':')[2];
                 string target = d[2];
-                if (target == nick) { // Someone sent a private message to the bot
+                if (target == Nick) { // Someone sent a private message to the bot
                     EventManager.OnDirectMessage(user, message);
                 } else {
                     EventManager.OnChannelMessage(user, target, message);
@@ -235,7 +235,7 @@ namespace ModerationBot {
 
         public void ChangeNick(string newNick) {
             Write($"NICK {newNick}");
-            this.nick = newNick;
+            this.Nick = newNick;
         }
 
         internal bool Write(params string[] messages) {
